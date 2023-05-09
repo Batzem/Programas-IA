@@ -1,2 +1,5 @@
 # Programas-IA
-This carpet is destined to the projects we've been designing in the course "Artificial Intelligence Foundamentals" from ESFM IPN
+Fundamentos de Inteligencia Artificial
+Profesor: Becerra Sagredo Julian Tercero
+Alumno: Hernandez Almaraz Tonatiuh
+5AV1  ESFM IPN
