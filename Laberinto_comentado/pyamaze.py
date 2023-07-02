@@ -13,6 +13,10 @@ import random,datetime,csv,os
 from tkinter import *
 from enum import Enum
 from collections import deque
+#---------------------------------------------
+#   Definición de paletas pares de colores 
+#   Utiliza módulo enum
+#---------------------------------------------
 
 class COLOR(Enum):
    
@@ -25,6 +29,9 @@ class COLOR(Enum):
     blue=('DeepSkyBlue4','DeepSkyBlue2')
     yellow=('yellow2','yellow2')
 
+#-------------------------
+# Agente de búsqueda 
+#-------------------------
 class agent:
     '''
     The agents can be placed on the maze.
@@ -32,6 +39,9 @@ class agent:
     Or they can be the physical agents (like robots)
     They can have two shapes (square or arrow)
     '''
+     #-------------------------------+
+    # Constructor del agente dentro del laberinto   parentMaze
+    #-------------------------------+
     def __init__(self,parentMaze,x=None,y=None,shape='square',goal=None,filled=False,footprints=False,color:COLOR=COLOR.blue):
         '''
         parentmaze-->  The maze on which agent is placed.
@@ -55,6 +65,9 @@ class agent:
         _body-->    You don't need to pass this
                     Tracks the body of the agent (the previous positions of it)
         '''
+         #----------------------------------
+        # Checa que sean str los elementos de la tupla color
+        #----------------------------------------------------
         self._parentMaze=parentMaze
         self.color=color
         if(isinstance(color,str)):
@@ -77,16 +90,31 @@ class agent:
             self.goal=goal
         self._body=[]
         self.position=(self.x,self.y)
-        
+    #--------------------------
+    # variable protegida x
+    #--------------------------
     @property
     def x(self):
         return self._x
+
+    #------------------------
+    # Setter de x
+    #------------------------
     @x.setter
     def x(self,newX):
         self._x=newX
+
+    #-----------------------
+    # Variable protegida y
+    #-----------------------
+
     @property
     def y(self):
         return self._y
+
+    #------------------------
+    # Setter de Y
+    #------------------------
     @y.setter
     def y(self,newY):
         self._y=newY
@@ -162,18 +190,34 @@ class agent:
             except:
                 pass
             self._parentMaze._redrawCell(self.x,self.y,theme=self._parentMaze.theme)
+   #------------------------------
+   #    VECTOR DE POSICIPON (X,Y)
+   #------------------------------
+   
     @property
     def position(self):
         return (self.x,self.y)
+
+    #-------------------------............
+    #   Setter del vector de posición
+    #-------------------------------------
     @position.setter
     def position(self,newpos):
         self.x=newpos[0]
         self.y=newpos[1]
         self._position=newpos
+
+    #------------------------------------------------------
+    # Rotación del agente contra manecillas del reloj
+    #------------------------------------------------------
     def _RCCW(self):
         '''
         To Rotate the agent in Counter Clock Wise direction
         '''
+
+        #-----------------------
+        #   Punto nuevo
+        #------------------------
         def pointNew(p,newOrigin):
             return (p[0]-newOrigin[0],p[1]-newOrigin[1])
         w=self._parentMaze._cell_width
@@ -190,7 +234,7 @@ class agent:
         self._parentMaze._canvas.coords(self._head,*self._coord)
         self._orient=(self._orient-1)%4
  
-        
+    
     def _RCW(self):
         '''
         To Rotate the agent in Clock Wise direction
@@ -226,10 +270,18 @@ class agent:
         if self._parentMaze.maze_map[self.x,self.y]['S']==True:
             self.x=self.x+1
             self.y=self.y
+
+#-------------------------------------------
+#   Rotulación de la ventana del laberinto
+#--------------------------------------------
 class textLabel:
     '''
     This class is to create Text Label to show different results on the window.
     '''
+
+    #---------------------------
+    #   constructor del rótulo
+    #----------------------------
     def __init__(self,parentMaze,title,value):
         '''
         parentmaze-->   The maze on which Label will be displayed.
@@ -242,23 +294,42 @@ class textLabel:
         # self._parentMaze._labels.append(self)
         self._var=None
         self.drawLabel()
+
+    #-------------------------------
+    #   Propiedad value
+    #--------------------------------
     @property
     def value(self):
         return self._value
+
+    #------------------------
+    # Setter de value
+    #------------------------
     @value.setter
     def value(self,v):
         self._value=v
         self._var.set(f'{self.title} : {v}')
+    
+    #--------------------------
+    #   Dibujar rótulo
+    #---------------------------
     def drawLabel(self):
         self._var = StringVar()
         self.lab = Label(self._parentMaze._canvas, textvariable=self._var, bg="white", fg="black",font=('Helvetica bold',12),relief=RIDGE)
         self._var.set(f'{self.title} : {self.value}')
         self.lab.pack(expand = True,side=LEFT,anchor=NW)
 
+#--------------------
+#   LABERINTO
+#--------------------
 class maze:
     '''
     This is the main class to create maze.
     '''
+
+    #-----------------------------------------------
+    #   CONSTRUCTOR DEL LABERINTO, DEFAULT 10X10
+    #-----------------------------------------------
     def __init__(self,rows=10,cols=10):
         '''
         rows--> No. of rows of the maze
@@ -278,8 +349,13 @@ class maze:
                         path trace by the agent.
         _
         '''
+        print("creando un laberinto")
         self.rows=rows
         self.cols=cols
+        #-------------------------------------------------------------------
+        # Maze map: diccionario de celdas con valor otro diccionario de
+        #           direcciones y valores de bloqueo 0 o apertura 1
+        #--------------------------------------------------------------------
         self.maze_map={}
         self.grid=[]
         self.path={} 
@@ -288,10 +364,15 @@ class maze:
         self._canvas=None
         self._agents=[]
         self.markCells=[]
-
+    #----------------------
+    #PROPIEDAD MALLA
+    #----------------------
     @property
     def grid(self):
         return self._grid
+    #----------------------
+    #setter de malla
+    #----------------------
     @grid.setter        
     def grid(self,n):
         self._grid=[]
@@ -303,6 +384,10 @@ class maze:
                 self.grid.append((x,y))
                 self.maze_map[x,y]={'E':0,'W':0,'N':0,'S':0}
                 x = x + 1 
+
+    #-------------------------------------
+    # Apertura al este
+    #-------------------------------------
     def _Open_East(self,x, y):
         '''
         To remove the East Wall of the cell
@@ -310,14 +395,25 @@ class maze:
         self.maze_map[x,y]['E']=1
         if y+1<=self.cols:
             self.maze_map[x,y+1]['W']=1
+    #-------------------------------------
+    # Apertura al oeste
+    #-------------------------------------  
     def _Open_West(self,x, y):
         self.maze_map[x,y]['W']=1
         if y-1>0:
             self.maze_map[x,y-1]['E']=1
+    
+    #-------------------------------------
+    # Apertura al norte
+    #-------------------------------------
     def _Open_North(self,x, y):
         self.maze_map[x,y]['N']=1
         if x-1>0:
             self.maze_map[x-1,y]['S']=1
+   
+    #-------------------------------------
+    # Apertura al sur
+    #-------------------------------------
     def _Open_South(self,x, y):
         self.maze_map[x,y]['S']=1
         if x+1<=self.rows:
@@ -555,6 +651,10 @@ class maze:
                         if i==len(notPathCells):
                             break
                 self.path=BFS((self.rows,self.cols))
+
+        #-----------------------------------
+        # CARGAR LABERINTO DE ARCHIVO CSV
+        #-----------------------------------
         else:
             # Load maze from CSV file
             with open(loadMaze,'r') as f:
@@ -590,7 +690,9 @@ class maze:
                 f.seek(0, os.SEEK_END)
                 f.seek(f.tell()-2, os.SEEK_SET)
                 f.truncate()
-
+    #-----------------------------------
+    # GRÁFICOS DEL LABERINTO
+    #------------------------------------
     def _drawMaze(self,theme):
         '''
         Creation of Tkinter window and maze lines
@@ -658,6 +760,11 @@ class maze:
         if self.maze_map[cell]['S']==False:
             self._canvas.create_line(y, x + w, y + w, x + w,width=2,fill=theme.value[1])
 
+
+    #----------------------------
+    # Permitir uso del teclado
+    #----------------------------
+
     def enableArrowKey(self,a):
         '''
         To control an agent a with Arrow Keys
@@ -667,6 +774,10 @@ class maze:
         self._win.bind('<Up>',a.moveUp)
         self._win.bind('<Down>',a.moveDown)
     
+
+    #------------------------------------------
+    #   PERMITIR USO DE LAS TECLAS W A S D
+    #-------------------------------------------
     def enableWASD(self,a):
         '''
         To control an agent a with keys W,A,S,D
@@ -708,7 +819,10 @@ class maze:
             if kill:
                 self._win.after(300, killAgent,a)         
             return
-        # If path is provided as Dictionary
+
+        #-----------------------------------------------------
+        #   Si la trayectoria se da en forma de diccionario
+        #-----------------------------------------------------
         if(type(p)==dict):
             if(len(p)==0):
                 del maze._tracePathList[0][0][a]
@@ -749,7 +863,11 @@ class maze:
                     del p[(a.x,a.y)]
             else:    
                 a.x,a.y=p[(a.x,a.y)]
-        # If path is provided as String
+        
+
+        #------------------------------------
+        # Trayectoria dada por una cadena
+        #------------------------------------
         if (type(p)==str):
             if(len(p)==0):
                 del maze._tracePathList[0][0][a]
@@ -804,7 +922,11 @@ class maze:
                 elif move=='A':
                     a._RCCW()
                 p=p[1:]
-        # If path is provided as List
+        
+      #----------------------------------
+      # Trayectoria dada como una lista
+      #----------------------------------
+
         if (type(p)==list):
             if(len(p)==0):
                 del maze._tracePathList[0][0][a]
@@ -856,6 +978,9 @@ class maze:
 
         self._win.after(delay, self._tracePathSingle,a,p,kill,showMarked,delay)    
 
+    #------------------------------
+    # Encontrar trayectoria
+    #------------------------------
     def tracePath(self,d,kill=False,delay=300,showMarked=False):
         '''
         A method to trace path by agent
@@ -866,6 +991,10 @@ class maze:
             for a,p in d.items():
                 if a.goal!=(a.x,a.y) and len(p)!=0:
                     self._tracePathSingle(a,p,kill,showMarked,delay)
+
+    #-----------------------------------
+    #   Correr el main loop de Tkinter
+    #-----------------------------------
     def run(self):
         '''
         Finally to run the Tkinter Main Loop
