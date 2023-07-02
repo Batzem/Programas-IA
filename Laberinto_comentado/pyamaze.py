@@ -1,19 +1,21 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr  3 16:45:21 2023
 
+@author: ESFM
+"""
+#------------------------------
+#    ESFM IPN
+#    TONATIUH HERNANDEZ 5AV1
+#    FUNDAMENTOS DE IA
+#------------------------------
 import random,datetime,csv,os
 from tkinter import *
 from enum import Enum
 from collections import deque
 
 class COLOR(Enum):
-    '''
-    This class is created to use the Tkinter colors easily.
-    Each COLOR object has two color values.
-    The first two objects (dark and light) are for theme and the two color
-    values represent the Canvas color and the Maze Line color respectively.
-    The rest of the colors are for Agents.
-    The first value is the color of the Agent and the second is the color of
-    its footprint
-    '''
+   
     dark=('gray11','white')
     light=('white','black')
     black=('black','dim gray')
